@@ -1,5 +1,6 @@
 api_platform:
-    title: Hello API Platform
+    title: TaskFlow API
+    description: Collaborative Task Management Web Application API
     version: 1.0.0
     defaults:
         stateless: true

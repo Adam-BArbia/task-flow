@@ -1,0 +1,112 @@
+{% extends "base.html.twig" %}
+
+{% block title %}{{ projet.nom }} - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>{{ projet.nom }}</h1>
+        <p class="text-muted">
+            Créateur: <strong>{{ projet.createur.pseudo }}</strong> | 
+            Créé: {{ projet.dateCreation|date('d/m/Y') }}
+        </p>
+    </div>
+    <div class="col-md-4 text-end">
+        {% if projet.createur == app.user or is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('projet_edit', { id: projet.id }) }}" class="btn btn-warning">Modifier</a>
+            <form method="POST" action="{{ path('projet_delete', { id: projet.id }) }}" style="display: inline;">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ projet.id) }}">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce projet ?');">Supprimer</button>
+            </form>
+        {% endif %}
+        <a href="{{ path('projet_list') }}" class="btn btn-secondary">Retour</a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Informations</h5>
+        <p>
+            <strong>Statut:</strong> 
+            {% if projet.statut == 'planifie' %}
+                <span class="badge bg-info">🔵 Planifié</span>
+            {% elseif projet.statut == 'en_cours' %}
+                <span class="badge bg-warning text-dark">🟡 En cours</span>
+            {% elseif projet.statut == 'termine' %}
+                <span class="badge bg-success">🟢 Terminé</span>
+            {% elseif projet.statut == 'annule' %}
+                <span class="badge bg-danger">🔴 Annulé</span>
+            {% endif %}
+        </p>
+        <p><strong>Date limite:</strong> {{ projet.dateLimite|date('d/m/Y') }}</p>
+        {% if projet.description %}
+            <p><strong>Description:</strong></p>
+            <p>{{ projet.description }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<h3>Tâches ({{ taches|length }})</h3>
+
+{% if is_granted('ROLE_USER') %}
+    <a href="{{ path('tache_new', { projet_id: projet.id }) }}" class="btn btn-success mb-3">
+        + Ajouter une tâche
+    </a>
+{% endif %}
+
+{% if taches|length == 0 %}
+    <div class="alert alert-info">
+        <p>Aucune tâche pour ce projet.</p>
+    </div>
+{% else %}
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Titre</th>
+                <th>Priorité</th>
+                <th>Statut</th>
+                <th>Assigné à</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tache in taches %}
+                <tr>
+                    <td>
+                        <a href="{{ path('tache_detail', { id: tache.id }) }}">
+                            {{ tache.titre }}
+                        </a>
+                    </td>
+                    <td>
+                        {% if tache.priorite == 'basse' %}
+                            <span class="badge bg-info">🔵 Basse</span>
+                        {% elseif tache.priorite == 'moyenne' %}
+                            <span class="badge bg-success">🟢 Moyenne</span>
+                        {% elseif tache.priorite == 'haute' %}
+                            <span class="badge bg-warning text-dark">🟠 Haute</span>
+                        {% elseif tache.priorite == 'urgente' %}
+                            <span class="badge bg-danger">🔴 Urgente</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if tache.statut == 'a_faire' %}
+                            <span class="badge bg-secondary">À faire</span>
+                        {% elseif tache.statut == 'en_cours' %}
+                            <span class="badge bg-primary">En cours</span>
+                        {% elseif tache.statut == 'terminee' %}
+                            <span class="badge bg-success">✓ Terminée</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ tache.assignee ? tache.assignee.pseudo : 'Non assignée' }}</td>
+                    <td>
+                        <a href="{{ path('tache_detail', { id: tache.id }) }}" class="btn btn-sm btn-info">Voir</a>
+                        {% if is_granted('ROLE_USER') %}
+                            <a href="{{ path('tache_edit', { id: tache.id }) }}" class="btn btn-sm btn-warning">Modifier</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% endblock %}

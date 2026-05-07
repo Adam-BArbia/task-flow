@@ -1,0 +1,34 @@
+{% extends "base.html.twig" %}
+
+{% block title %}{% if isEdit %}Modifier le projet{% else %}Créer un projet{% endif %} - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h1>{% if isEdit %}Modifier le projet{% else %}Créer un projet{% endif %}</h1>
+
+        {{ form_start(form) }}
+            <div class="mb-3">
+                {{ form_row(form.nom) }}
+            </div>
+            <div class="mb-3">
+                {{ form_row(form.description) }}
+            </div>
+            <div class="mb-3">
+                {{ form_row(form.dateLimite) }}
+            </div>
+            <div class="mb-3">
+                {{ form_row(form.statut) }}
+            </div>
+            <div class="mb-3">
+                {{ form_row(form.imageName) }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                {% if isEdit %}Modifier{% else %}Créer{% endif %}
+            </button>
+            <a href="{% if isEdit %}{{ path('projet_detail', { id: projet.id }) }}{% else %}{{ path('projet_list') }}{% endif %}" class="btn btn-secondary">Annuler</a>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html.twig" %}
+
+{% block title %}{% if isEdit %}Modifier l'étiquette{% else %}Créer une étiquette{% endif %} - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <h1>{% if isEdit %}Modifier l'étiquette{% else %}Créer une étiquette{% endif %}</h1>
+
+        {{ form_start(form) }}
+            <div class="mb-3">
+                {{ form_row(form.nom) }}
+            </div>
+            <div class="mb-3">
+                {{ form_row(form.couleur) }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                {% if isEdit %}Modifier{% else %}Créer{% endif %}
+            </button>
+            <a href="{{ path('etiquette_list') }}" class="btn btn-secondary">Annuler</a>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

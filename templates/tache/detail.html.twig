@@ -1,0 +1,83 @@
+{% extends "base.html.twig" %}
+
+{% block title %}{{ tache.titre }} - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>{{ tache.titre }}</h1>
+        <p class="text-muted">
+            Projet: <a href="{{ path('projet_detail', { id: tache.projet.id }) }}">{{ tache.projet.nom }}</a>
+        </p>
+    </div>
+    <div class="col-md-4 text-end">
+        {% if is_granted('ROLE_USER') %}
+            <a href="{{ path('tache_edit', { id: tache.id }) }}" class="btn btn-warning">Modifier</a>
+            <form method="POST" action="{{ path('tache_delete', { id: tache.id }) }}" style="display: inline;">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ tache.id) }}">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?');">Supprimer</button>
+            </form>
+        {% endif %}
+        <a href="{{ path('projet_detail', { id: tache.projet.id }) }}" class="btn btn-secondary">Retour</a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Informations</h5>
+        <p>
+            <strong>Priorité:</strong> 
+            {% if tache.priorite == 'basse' %}
+                <span class="badge bg-info">🔵 Basse</span>
+            {% elseif tache.priorite == 'moyenne' %}
+                <span class="badge bg-success">🟢 Moyenne</span>
+            {% elseif tache.priorite == 'haute' %}
+                <span class="badge bg-warning text-dark">🟠 Haute</span>
+            {% elseif tache.priorite == 'urgente' %}
+                <span class="badge bg-danger">🔴 Urgente</span>
+            {% endif %}
+        </p>
+        <p>
+            <strong>Statut:</strong> 
+            {% if tache.statut == 'a_faire' %}
+                <span class="badge bg-secondary">À faire</span>
+            {% elseif tache.statut == 'en_cours' %}
+                <span class="badge bg-primary">En cours</span>
+            {% elseif tache.statut == 'terminee' %}
+                <span class="badge bg-success">✓ Terminée</span>
+            {% endif %}
+        </p>
+        <p><strong>Créée:</strong> {{ tache.dateCreation|date('d/m/Y H:i') }}</p>
+        {% if tache.dateEcheance %}
+            <p><strong>Date d'échéance:</strong> {{ tache.dateEcheance|date('d/m/Y') }}</p>
+        {% endif %}
+        {% if tache.assignee %}
+            <p><strong>Assignée à:</strong> {{ tache.assignee.pseudo }}</p>
+        {% else %}
+            <p><strong>Assignée à:</strong> <em>Non assignée</em></p>
+        {% endif %}
+    </div>
+</div>
+
+{% if tache.description %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Description</h5>
+            <p>{{ tache.description }}</p>
+        </div>
+    </div>
+{% endif %}
+
+{% if tache.etiquettes|length > 0 %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Étiquettes</h5>
+            {% for etiquette in tache.etiquettes %}
+                <span class="badge" style="background-color: {{ etiquette.couleur }};">
+                    {{ etiquette.nom }}
+                </span>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

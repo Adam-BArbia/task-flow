@@ -1,0 +1,43 @@
+{% extends "base.html.twig" %}
+
+{% block title %}{% if isEdit %}Modifier la tâche{% else %}Créer une tâche{% endif %} - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h1>{% if isEdit %}Modifier la tâche{% else %}Créer une tâche{% endif %}</h1>
+
+        {{ form_start(form) }}
+            <div class="mb-3">
+                {{ form_row(form.titre) }}
+            </div>
+            <div class="mb-3">
+                {{ form_row(form.description) }}
+            </div>
+            <div class="mb-3">
+                {{ form_row(form.priorite) }}
+            </div>
+            <div class="mb-3">
+                {{ form_row(form.statut) }}
+            </div>
+            <div class="mb-3">
+                {{ form_row(form.dateEcheance) }}
+            </div>
+            <div class="mb-3">
+                {{ form_row(form.assignee) }}
+            </div>
+            <div class="mb-3">
+                {{ form_row(form.etiquettes) }}
+            </div>
+            <div class="mb-3">
+                {{ form_row(form.pieceJointeName) }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                {% if isEdit %}Modifier{% else %}Créer{% endif %}
+            </button>
+            <a href="{% if isEdit %}{{ path('tache_detail', { id: tache.id }) }}{% else %}{{ path('projet_list') }}{% endif %}" class="btn btn-secondary">Annuler</a>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
