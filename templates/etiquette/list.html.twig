@@ -37,9 +37,9 @@
                         </span>
                     </td>
                     <td>
-                        <form method="POST" action="{{ path('etiquette_delete', { id: etiquette.id }) }}" style="display: inline;">
+                        <form method="POST" action="{{ path('etiquette_delete', { id: etiquette.id }) }}" style="display: inline;" class="delete-form">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ etiquette.id) }}">
-                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette étiquette ?');">Supprimer</button>
+                            <button type="submit" class="btn btn-sm btn-danger delete-btn">Supprimer</button>
                         </form>
                     </td>
                 </tr>

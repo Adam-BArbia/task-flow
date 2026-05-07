@@ -14,9 +14,9 @@
     <div class="col-md-4 text-end">
         {% if projet.createur == app.user or is_granted('ROLE_ADMIN') %}
             <a href="{{ path('projet_edit', { id: projet.id }) }}" class="btn btn-warning">Modifier</a>
-            <form method="POST" action="{{ path('projet_delete', { id: projet.id }) }}" style="display: inline;">
+            <form method="POST" action="{{ path('projet_delete', { id: projet.id }) }}" style="display: inline;" class="delete-form">
                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ projet.id) }}">
-                <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce projet ?');">Supprimer</button>
+                <button type="submit" class="btn btn-danger delete-btn">Supprimer</button>
             </form>
         {% endif %}
         <a href="{{ path('projet_list') }}" class="btn btn-secondary">Retour</a>
@@ -52,6 +52,45 @@
     <a href="{{ path('tache_new', { projet_id: projet.id }) }}" class="btn btn-success mb-3">
         + Ajouter une tâche
     </a>
+{% endif %}
+
+{% if taches|length > 0 %}
+    {# Task Search Form #}
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ path('projet_detail', { id: projet.id }) }}" class="row g-3">
+                <div class="col-md-4">
+                    <input 
+                        type="text" 
+                        name="q" 
+                        class="form-control" 
+                        placeholder="🔍 Chercher par titre..."
+                        value="{{ app.request.query.get('q', '') }}"
+                    >
+                </div>
+                <div class="col-md-3">
+                    <select name="statut" class="form-select">
+                        <option value="">Tous les statuts</option>
+                        <option value="a_faire" {% if app.request.query.get('statut') == 'a_faire' %}selected{% endif %}>À faire</option>
+                        <option value="en_cours" {% if app.request.query.get('statut') == 'en_cours' %}selected{% endif %}>En cours</option>
+                        <option value="terminee" {% if app.request.query.get('statut') == 'terminee' %}selected{% endif %}>Terminée</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="priorite" class="form-select">
+                        <option value="">Toutes les priorités</option>
+                        <option value="basse" {% if app.request.query.get('priorite') == 'basse' %}selected{% endif %}>Basse</option>
+                        <option value="moyenne" {% if app.request.query.get('priorite') == 'moyenne' %}selected{% endif %}>Moyenne</option>
+                        <option value="haute" {% if app.request.query.get('priorite') == 'haute' %}selected{% endif %}>Haute</option>
+                        <option value="urgente" {% if app.request.query.get('priorite') == 'urgente' %}selected{% endif %}>Urgente</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">Chercher</button>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endif %}
 
 {% if taches|length == 0 %}
@@ -102,6 +141,10 @@
                         <a href="{{ path('tache_detail', { id: tache.id }) }}" class="btn btn-sm btn-info">Voir</a>
                         {% if is_granted('ROLE_USER') %}
                             <a href="{{ path('tache_edit', { id: tache.id }) }}" class="btn btn-sm btn-warning">Modifier</a>
+                            <form method="POST" action="{{ path('tache_delete', { id: tache.id }) }}" style="display: inline;" class="delete-form">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ tache.id) }}">
+                                <button type="submit" class="btn btn-sm btn-danger delete-btn">Supprimer</button>
+                            </form>
                         {% endif %}
                     </td>
                 </tr>

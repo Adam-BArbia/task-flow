@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Projet;
 use App\Form\ProjetType;
 use App\Repository\ProjetRepository;
+use App\Service\SearchService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,36 +17,74 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class ProjetController extends AbstractController
 {
     #[Route('', name: 'projet_list', methods: ['GET'])]
-    public function list(ProjetRepository $repository, Request $request): Response
+    public function list(ProjetRepository $repository, SearchService $searchService, Request $request): Response
     {
-        // Fetch all projects (pagination will be added later with KnpPaginator)
-        $projets = $repository->findAll();
+        $query = $request->query->get('q', '');
+        $status = $request->query->get('statut');
+        $sortBy = $request->query->get('sort', 'nom');
+        $sortOrder = $request->query->get('order', 'asc');
+        $recentProjectIds = $request->getSession()->get('recent_projects', []);
+        $recentProjects = [];
+
+        foreach ($recentProjectIds as $projectId) {
+            $recentProject = $repository->find($projectId);
+            if ($recentProject !== null) {
+                $recentProjects[] = $recentProject;
+            }
+        }
+
+        // Validate sort parameters to prevent injection
+        $validSort = ['nom', 'dateCreation', 'dateLimite'];
+        $sortBy = in_array($sortBy, $validSort) ? $sortBy : 'nom';
+        $sortOrder = in_array($sortOrder, ['asc', 'desc']) ? $sortOrder : 'asc';
+
+        // Search and sort projects
+        $projets = $searchService->advancedProjetsSearch($query, $status, $sortBy, $sortOrder);
 
         return $this->render('projet/list.html.twig', [
             'projets' => $projets,
+            'query' => $query,
+            'status' => $status,
+            'sortBy' => $sortBy,
+            'sortOrder' => $sortOrder,
+            'recentProjects' => $recentProjects,
         ]);
     }
 
     #[Route('/{id}', name: 'projet_detail', methods: ['GET'])]
-    public function detail(Projet $projet, Request $request): Response
+    public function detail(Projet $projet, ProjetRepository $repository, Request $request, SearchService $searchService): Response
     {
         // Store recently viewed project in session (will be enhanced later)
         $session = $request->getSession();
-        $recentProjects = $session->get('recent_projects', []);
+        $recentProjectIds = $session->get('recent_projects', []);
         
         // Add current project to recent (max 5, FIFO, no duplicates)
-        if (($key = array_search($projet->getId(), $recentProjects)) !== false) {
-            unset($recentProjects[$key]);
+        if (($key = array_search($projet->getId(), $recentProjectIds, true)) !== false) {
+            unset($recentProjectIds[$key]);
         }
-        array_unshift($recentProjects, $projet->getId());
-        $recentProjects = array_slice($recentProjects, 0, 5);
-        $session->set('recent_projects', $recentProjects);
+        array_unshift($recentProjectIds, $projet->getId());
+        $recentProjectIds = array_slice($recentProjectIds, 0, 5);
+        $session->set('recent_projects', $recentProjectIds);
 
-        $taches = $projet->getTaches();
+        // Filter tasks based on query parameters
+        $query = $request->query->get('q', '');
+        $status = $request->query->get('statut');
+        $priority = $request->query->get('priorite');
+        $recentProjects = [];
+
+        foreach ($recentProjectIds as $projectId) {
+            $recentProject = $repository->find($projectId);
+            if ($recentProject !== null) {
+                $recentProjects[] = $recentProject;
+            }
+        }
+
+        $taches = $searchService->searchTaches($query, $status, $priority, $projet->getId());
 
         return $this->render('projet/detail.html.twig', [
             'projet' => $projet,
             'taches' => $taches,
+            'recentProjects' => $recentProjects,
         ]);
     }
 
