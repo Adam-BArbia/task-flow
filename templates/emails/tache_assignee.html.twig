@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle tâche assignée - TaskFlow</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #1f2937; background-color: #f8fafc; padding: 24px;">
+    <div style="max-width: 640px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 24px; border: 1px solid #e5e7eb;">
+        <h1 style="margin-top: 0; color: #0f172a;">Une tâche vous a été assignée</h1>
+
+        <p>Bonjour {{ assignee.pseudo }},</p>
+
+        <p>Une nouvelle tâche vient de vous être assignée dans TaskFlow.</p>
+
+        <div style="background: #f8fafc; border-left: 4px solid #2563eb; padding: 16px; margin: 20px 0; border-radius: 8px;">
+            <p style="margin: 0 0 8px;"><strong>Titre :</strong> {{ tache.titre }}</p>
+            <p style="margin: 0 0 8px;"><strong>Projet :</strong> {{ tache.projet.nom }}</p>
+            <p style="margin: 0 0 8px;"><strong>Priorité :</strong> {{ {
+                'basse': 'Basse',
+                'moyenne': 'Moyenne',
+                'haute': 'Haute',
+                'urgente': 'Urgente'
+            }[tache.priorite] ?? tache.priorite|capitalize }}</p>
+            <p style="margin: 0;"><strong>Échéance :</strong> {{ tache.dateEcheance ? tache.dateEcheance|date('d/m/Y') : 'Aucune date limite définie' }}</p>
+        </div>
+
+        <p>Connectez-vous à TaskFlow pour consulter les détails et commencer le travail.</p>
+
+        <p style="margin-bottom: 0; color: #6b7280;">Cordialement,<br>Équipe TaskFlow</p>
+    </div>
+</body>
+</html>

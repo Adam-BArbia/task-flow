@@ -51,7 +51,7 @@ class ProjetController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'projet_detail', methods: ['GET'])]
+    #[Route('/{id}', name: 'projet_detail', methods: ['GET'], requirements: ['id' => '\\d+'])]
     public function detail(Projet $projet, ProjetRepository $repository, Request $request, SearchService $searchService): Response
     {
         // Store recently viewed project in session (will be enhanced later)
@@ -115,7 +115,7 @@ class ProjetController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/modifier', name: 'projet_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/modifier', name: 'projet_edit', methods: ['GET', 'POST'], requirements: ['id' => '\\d+'])]
     #[IsGranted('ROLE_USER')]
     public function edit(Projet $projet, Request $request, EntityManagerInterface $em): Response
     {
@@ -142,7 +142,7 @@ class ProjetController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/supprimer', name: 'projet_delete', methods: ['POST'])]
+    #[Route('/{id}/supprimer', name: 'projet_delete', methods: ['POST'], requirements: ['id' => '\\d+'])]
     #[IsGranted('ROLE_USER')]
     public function delete(Projet $projet, Request $request, EntityManagerInterface $em): Response
     {

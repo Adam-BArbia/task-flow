@@ -20,6 +20,12 @@ security:
             # Ensure dev tools and static assets are always allowed
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
+        api:
+            # API routes are stateless (no sessions)
+            pattern: ^/api/
+            stateless: true
+            provider: app_user_provider
+            custom_authenticator: App\Security\AppAuthenticator
         main:
             lazy: true
             provider: app_user_provider
@@ -37,6 +43,8 @@ security:
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api, roles: PUBLIC_ACCESS, methods: [GET, HEAD, OPTIONS] }
+        - { path: ^/api, roles: ROLE_USER, methods: [POST, PUT, PATCH, DELETE] }
         - { path: ^/etiquettes, roles: ROLE_ADMIN }
         - { path: ^/, roles: ROLE_USER }
 
