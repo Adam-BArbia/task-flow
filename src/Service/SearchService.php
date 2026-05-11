@@ -26,6 +26,9 @@ class SearchService
      */
     public function searchProjets(string $query = '', ?string $status = null): array
     {
+        $query = trim($query);
+        $status = $this->normalizeFilter($status);
+
         $projets = $this->projetRepository->findAll();
         
         return array_filter($projets, function (Projet $projet) use ($query, $status) {
@@ -54,6 +57,10 @@ class SearchService
         ?string $priority = null,
         ?int $projetId = null
     ): array {
+        $query = trim($query);
+        $status = $this->normalizeFilter($status);
+        $priority = $this->normalizeFilter($priority);
+
         $taches = $this->tacheRepository->findAll();
         
         return array_filter($taches, function (Tache $tache) use ($query, $status, $priority, $projetId) {
@@ -151,5 +158,16 @@ class SearchService
         });
         
         return $taches;
+    }
+
+    private function normalizeFilter(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim($value);
+
+        return $value === '' ? null : $value;
     }
 }

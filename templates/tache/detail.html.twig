@@ -13,9 +13,9 @@
     <div class="col-md-4 text-end">
         {% if is_granted('ROLE_USER') %}
             <a href="{{ path('tache_edit', { id: tache.id }) }}" class="btn btn-warning">Modifier</a>
-            <form method="POST" action="{{ path('tache_delete', { id: tache.id }) }}" style="display: inline;">
+            <form method="POST" action="{{ path('tache_delete', { id: tache.id }) }}" style="display: inline;" class="delete-form">
                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ tache.id) }}">
-                <button type="submit" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?');">Supprimer</button>
+                <button type="submit" class="btn btn-danger delete-btn">Supprimer</button>
             </form>
         {% endif %}
         <a href="{{ path('projet_detail', { id: tache.projet.id }) }}" class="btn btn-secondary">Retour</a>

@@ -80,6 +80,9 @@
         "symfony/polyfill-php82": "*"
     },
     "scripts": {
+        "dev:boot": [
+            "powershell -ExecutionPolicy Bypass -File scripts/dev-boot.ps1"
+        ],
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
