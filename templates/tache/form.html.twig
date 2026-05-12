@@ -30,7 +30,21 @@
                 {{ form_row(form.etiquettes) }}
             </div>
             <div class="mb-3">
+                {% if isEdit and tache.pieceJointeName %}
+                    <p class="mb-2">
+                        <strong>Pièce jointe actuelle:</strong>
+                        <a href="{{ asset('uploads/taches/' ~ tache.pieceJointeName) }}" target="_blank" rel="noopener noreferrer">
+                            {{ tache.pieceJointeName }}
+                        </a>
+                    </p>
+                {% endif %}
                 {{ form_row(form.pieceJointeName) }}
+
+                {% if form.removeAttachment is defined %}
+                    <div class="mt-2">
+                        {{ form_row(form.removeAttachment) }}
+                    </div>
+                {% endif %}
             </div>
 
             <button type="submit" class="btn btn-primary">

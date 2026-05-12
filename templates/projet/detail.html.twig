@@ -138,6 +138,9 @@
                     </td>
                     <td>{{ tache.assignee ? tache.assignee.pseudo : 'Non assignée' }}</td>
                     <td>
+                        {% if tache.pieceJointeName %}
+                            <a href="{{ asset('uploads/taches/' ~ tache.pieceJointeName) }}" class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener noreferrer">PJ</a>
+                        {% endif %}
                         <a href="{{ path('tache_detail', { id: tache.id }) }}" class="btn btn-sm btn-info">Voir</a>
                         {% if is_granted('ROLE_USER') %}
                             <a href="{{ path('tache_edit', { id: tache.id }) }}" class="btn btn-sm btn-warning">Modifier</a>

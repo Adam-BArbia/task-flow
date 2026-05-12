@@ -6,7 +6,9 @@ use App\Entity\Projet;
 use App\Entity\Tache;
 use App\Form\TacheType;
 use App\Repository\TacheRepository;
+use App\Service\FileUploader;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Mailer\MailerInterface;
@@ -29,7 +31,7 @@ class TacheController extends AbstractController
 
     #[Route('/nouveau', name: 'tache_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_USER')]
-    public function new(Request $request, EntityManagerInterface $em, MailerInterface $mailer, LoggerInterface $logger): Response
+    public function new(Request $request, EntityManagerInterface $em, MailerInterface $mailer, LoggerInterface $logger, FileUploader $fileUploader): Response
     {
         $tache = new Tache();
         
@@ -41,10 +43,18 @@ class TacheController extends AbstractController
             }
         }
 
-        $form = $this->createForm(TacheType::class, $tache);
+        $form = $this->createForm(TacheType::class, $tache, [
+            'has_attachment' => false,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var UploadedFile|null $attachment */
+            $attachment = $form->get('pieceJointeName')->getData();
+            if ($attachment instanceof UploadedFile) {
+                $tache->setPieceJointeName($fileUploader->upload($attachment));
+            }
+
             $em->persist($tache);
             $em->flush();
 
@@ -85,13 +95,36 @@ class TacheController extends AbstractController
 
     #[Route('/{id}/modifier', name: 'tache_edit', methods: ['GET', 'POST'], requirements: ['id' => '\\d+'])]
     #[IsGranted('ROLE_USER')]
-    public function edit(Tache $tache, Request $request, EntityManagerInterface $em, MailerInterface $mailer): Response
+    public function edit(Tache $tache, Request $request, EntityManagerInterface $em, MailerInterface $mailer, FileUploader $fileUploader): Response
     {
         $originalAssignee = $tache->getAssignee();
-        $form = $this->createForm(TacheType::class, $tache);
+        $originalAttachment = $tache->getPieceJointeName();
+        $form = $this->createForm(TacheType::class, $tache, [
+            'has_attachment' => $originalAttachment !== null,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $removeAttachment = $form->has('removeAttachment') && (bool) $form->get('removeAttachment')->getData();
+
+            /** @var UploadedFile|null $attachment */
+            $attachment = $form->get('pieceJointeName')->getData();
+
+            if ($removeAttachment && $originalAttachment !== null) {
+                $fileUploader->remove($originalAttachment);
+                $tache->setPieceJointeName(null);
+                $originalAttachment = null;
+            }
+
+            if ($attachment instanceof UploadedFile) {
+                $newAttachment = $fileUploader->upload($attachment);
+                $tache->setPieceJointeName($newAttachment);
+
+                if ($originalAttachment && $originalAttachment !== $newAttachment) {
+                    $fileUploader->remove($originalAttachment);
+                }
+            }
+
             $em->flush();
 
             $newAssignee = $tache->getAssignee();
@@ -123,12 +156,14 @@ class TacheController extends AbstractController
 
     #[Route('/{id}/supprimer', name: 'tache_delete', methods: ['POST'], requirements: ['id' => '\\d+'])]
     #[IsGranted('ROLE_USER')]
-    public function delete(Tache $tache, Request $request, EntityManagerInterface $em): Response
+    public function delete(Tache $tache, Request $request, EntityManagerInterface $em, FileUploader $fileUploader): Response
     {
         // CSRF token validation
         if (!$this->isCsrfTokenValid('delete' . $tache->getId(), $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
+
+        $fileUploader->remove($tache->getPieceJointeName());
 
         $projet = $tache->getProjet();
         $em->remove($tache);

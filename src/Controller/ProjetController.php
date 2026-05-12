@@ -7,6 +7,7 @@ use App\Form\ProjetType;
 use App\Repository\ProjetRepository;
 use App\Service\SearchService;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +18,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class ProjetController extends AbstractController
 {
     #[Route('', name: 'projet_list', methods: ['GET'])]
-    public function list(ProjetRepository $repository, SearchService $searchService, Request $request): Response
+    public function list(ProjetRepository $repository, SearchService $searchService, Request $request, PaginatorInterface $paginator): Response
     {
         $query = $request->query->get('q', '');
         $status = $request->query->get('statut');
@@ -40,9 +41,14 @@ class ProjetController extends AbstractController
 
         // Search and sort projects
         $projets = $searchService->advancedProjetsSearch($query, $status, $sortBy, $sortOrder);
+        $projetsPagination = $paginator->paginate(
+            $projets,
+            $request->query->getInt('page', 1),
+            10
+        );
 
         return $this->render('projet/list.html.twig', [
-            'projets' => $projets,
+            'projets' => $projetsPagination,
             'query' => $query,
             'status' => $status,
             'sortBy' => $sortBy,

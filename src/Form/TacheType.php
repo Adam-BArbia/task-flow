@@ -7,6 +7,7 @@ use App\Entity\Tache;
 use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -88,14 +89,24 @@ class TacheType extends AbstractType
                     ]),
                 ],
                 'attr' => ['accept' => '.pdf,.docx,image/*'],
-            ])
-        ;
+            ]);
+
+        if ($options['has_attachment']) {
+            $builder->add('removeAttachment', CheckboxType::class, [
+                'label' => 'Supprimer la pièce jointe actuelle',
+                'mapped' => false,
+                'required' => false,
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Tache::class,
+            'has_attachment' => false,
         ]);
+
+        $resolver->setAllowedTypes('has_attachment', 'bool');
     }
 }

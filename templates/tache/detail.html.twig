@@ -56,6 +56,14 @@
         {% else %}
             <p><strong>Assignée à:</strong> <em>Non assignée</em></p>
         {% endif %}
+        {% if tache.pieceJointeName %}
+            <p>
+                <strong>Pièce jointe:</strong>
+                <a href="{{ asset('uploads/taches/' ~ tache.pieceJointeName) }}" target="_blank" rel="noopener noreferrer">
+                    Télécharger
+                </a>
+            </p>
+        {% endif %}
     </div>
 </div>
 
